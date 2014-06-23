@@ -40,15 +40,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>K:\WinDDK\7600.16385.1\inc\api;C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;$(VCInstallDir)PlatformSDK\include;$(VSLIBDIR)\SmartHeap\include;$(VSLIBDIR)\SourcePro12;$(VSLIBDIR)\Stingray Studio 11.2\Include;$(VSLIBDIR)\Stingray Studio 11.2\RWUXTheme\Include;$(VSLIBDIR)\cppunit-1.12.1\include;$(VSLIBDIR)\BCGSoft-17.0\BCGCBPro;$(VSLIBDIR)\RPC;$(VSLIBDIR)\MQSeries_7\Tools\c\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(VSLIBDIR)\TIBCO\TIBRV\include\;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\Microsoft SDKs\Windows\v7.1\Include;$(VCInstallDir)PlatformSDK\include;$(VSLIBDIR)\SmartHeap\include;$(VSLIBDIR)\SourcePro12;$(VSLIBDIR)\Stingray Studio 11.2\Include;$(VSLIBDIR)\Stingray Studio 11.2\RWUXTheme\Include;$(VSLIBDIR)\cppunit-1.12.1\include;$(VSLIBDIR)\BCGSoft-17.0\BCGCBPro;$(VSLIBDIR)\RPC;$(VSLIBDIR)\MQSeries_7\Tools\c\include;$(JAVA_HOME)\include;$(JAVA_HOME)\include\win32;$(VSLIBDIR)\TIBCO\TIBRV\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Oculus\OculusSDK\Samples\OculusRoomTiny\Projects\Win\VS2012\Debug\;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -14,10 +14,15 @@ public:
 	//Resets the current position of the sensor bar to be the centre from which the offset is calculated
 	bool Reset();
 
+	//Query whether this is connected to any remotes
+	bool IsConnected();
+
 	//Returns the user's head position in millimetres relative to the centre point (which is calculated in Initialise and Reset)
 	bool GetPosition(float &x, float &y, float&z);
 
 	void SetRemoteDistance(float remoteDistance);
+
+	void PrepareForPositionRetrieve();
 
 	//ideally camerass will be horizontal
 	void SetCamerasVerticaleAngle(float camerasVerticaleAngle);

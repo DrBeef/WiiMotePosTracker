@@ -71,6 +71,7 @@ bool PositionTracker::Initialise()
 
 		//Happy with a single connection
 		connected = true;
+		m_remote[0].SetReportType(wiimote::IN_BUTTONS_ACCEL_IR_EXT);
 	}
 
 	//Attempt to connect to the second remote
@@ -81,14 +82,18 @@ bool PositionTracker::Initialise()
 		m_remote[1].PlaySquareWave(FREQ_3130HZ);
 		Sleep(500);
 		m_remote[1].EnableSpeaker (false);
+		m_remote[1].SetReportType(wiimote::IN_BUTTONS_ACCEL_IR_EXT);
 	}
 
-	//Wait for push of the A button on the first remote
-	while(!m_remote[0].Button.A())
+/*	if (m_remote[0].IsConnected())
 	{
-		m_remote[0].RefreshState();
-		Sleep(100);
-	}
+		//Wait for push of the A button on the first remote
+		while(!m_remote[0].Button.A())
+		{
+			m_remote[0].RefreshState();
+			Sleep(100);
+		}
+	}*/
 
 	return connected;
 }
@@ -108,6 +113,44 @@ bool PositionTracker::Reset()
 	return GetPosition(m_x, m_y, m_z);
 }
 
+void PositionTracker::PrepareForPositionRetrieve()
+{
+	//HACK, allows reset of position from the wii remote for testing
+	if (m_remote[0].Button.A())
+	{
+		Reset();
+	}
+}
+
+bool PositionTracker::IsConnected()
+{
+	//Check we still have a valid connection
+	if(m_remote[0].ConnectionLost())
+	{
+ 		m_remote[0].PlaySquareWave(FREQ_2940HZ);
+		return false;
+	}
+
+	if (m_remote[1].ConnectionLost())
+	{
+		m_remote[1].PlaySquareWave(FREQ_3130HZ);
+		return false;
+	}
+	/*
+	if (m_remote[0].IR.Mode == wiimote_state::ir::OFF)
+	{
+ 		m_remote[0].PlaySquareWave(FREQ_2940HZ);
+		return false;
+	}
+
+	if (m_remote[1].IsConnected() && m_remote[1].IR.Mode == wiimote_state::ir::OFF)
+	{
+		m_remote[1].PlaySquareWave(FREQ_3130HZ);
+		return false;
+	}*/
+
+	return m_remote[0].IsConnected();
+}
 
 //Returns the user's head position relative to the centre point (which is calculated in Initialise and Reset)
 bool PositionTracker::GetPosition(float &x, float &y, float&z)
@@ -117,9 +160,9 @@ bool PositionTracker::GetPosition(float &x, float &y, float&z)
 		m_remote[1].ConnectionLost())
 		return false;
 
-	if (m_remote[0].IR.Mode == wiimote_state::ir::OFF ||
-		(m_remote[1].IsConnected() && m_remote[1].IR.Mode == wiimote_state::ir::OFF))
-		return false;
+//	if (m_remote[0].IR.Mode == wiimote_state::ir::OFF ||
+//		(m_remote[1].IsConnected() && m_remote[1].IR.Mode == wiimote_state::ir::OFF))
+//		return false;
 
 	m_remote[0].RefreshState();
 	if (m_remote[1].IsConnected())
@@ -172,10 +215,10 @@ bool PositionTracker::GetPosition(float &x, float &y, float&z)
             float avgX = (dot[0][0].x + dot[0][1].x) / 2.0f;
             float avgY = (dot[0][0].y + dot[0][1].y) / 2.0f;
 
-            x = (float)(sin((float)M_PI_4 * (avgX - 0.5f)) * z) - m_x;
+            x = (float)(sin((float)M_PI_4 * (avgX - 0.5f)) * (z+m_z)) - m_x;
 
 			float relativeVerticalAngle = ( m_camerasAngledDownards ? -1.0f : 1.0f ) * (avgY - 0.5f) * (float)M_PI_4;
-			y = (float)(sin(relativeVerticalAngle + m_camerasVerticaleAngle) * z) - m_y;
+			y = (float)(sin(relativeVerticalAngle + m_camerasVerticaleAngle) * (z+m_z)) - m_y;
 
 			//Hurrah!
 			gotPosition = true;
@@ -270,12 +313,12 @@ bool PositionTracker::GetPosition(float &x, float &y, float&z)
 		float angleR2 = ((3.0f * (float)M_PI) / 8.0f) + ((1.0f - remote2Point.x)  * (float)M_PI_4);
 
 		//Calculate Z
-		z = (m_remoteSeparationInMM * sin(angleR1) * sin(angleR2)) / sin((float)M_PI - (angleR1 + angleR2));
+		z = m_z - (m_remoteSeparationInMM * sin(angleR1) * sin(angleR2)) / sin((float)M_PI - (angleR1 + angleR2));
 
 		//Use two points to calculate average X
         float r1_x = (float)(sin((float)M_PI_4 * (remote1Point.x - 0.5f)) * z);
         float r2_x = (float)(sin((float)M_PI_4 * (remote2Point.x - 0.5f)) * z);
-		x = (r1_x + r2_x) / 2.0f - m_x;
+		x = m_x - (r1_x + r2_x) / 2.0f;
 
 		//Use two points to calculate average Y
 		float relativeVerticalAngleR1 = ( m_camerasAngledDownards ? -1.0f : 1.0f ) * (remote1Point.y - 0.5f) * (float)M_PI_4;
@@ -284,7 +327,10 @@ bool PositionTracker::GetPosition(float &x, float &y, float&z)
 		float relativeVerticalAngleR2 = ( m_camerasAngledDownards ? -1.0f : 1.0f ) * (remote2Point.y - 0.5f) * (float)M_PI_4;
 		float r2_y = (float)(sin(relativeVerticalAngleR2 + m_camerasVerticaleAngle) * z);
 
-		y = (r1_y + r2_y) / 2.0f - m_y;
+		y = m_y - (r1_y + r2_y) / 2.0f;
+
+		y *= -1.0f;
+		z *= -1.0f;
 
 		//Hurrah!
 		gotPosition = true;
